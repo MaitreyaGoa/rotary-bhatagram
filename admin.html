@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin · Rotary Club of Bhatagram</title>
+<meta name="theme-color" content="#17458F">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--royal:#17458F;--royal-d:#0E2D5E;--gold:#F7A81B;--azure:#0067C8;--cran:#D41367;--grass:#009739;
+  --bg:#F3F6FB;--card:#fff;--ink:#0F1B33;--muted:#5B6782;--line:#E3E8F2}
+@media (prefers-color-scheme:dark){:root{--bg:#070F20;--card:#0E1A33;--ink:#EAF0FB;--muted:#9AA8C4;--line:#1D2C4D}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Open Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(160deg,var(--royal),var(--royal-d))}
+.login form{background:var(--card);border-radius:24px;padding:28px;width:min(400px,100%);display:grid;gap:14px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.login h1{font-size:1.3rem}.login p{color:var(--muted);font-size:.88rem}
+/* shell */
+header{position:sticky;top:0;z-index:20;background:var(--royal);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px}
+header b{font-weight:800}header small{opacity:.75;font-size:.75rem;display:block}
+header .sp{flex:1}
+.tabs{position:sticky;top:60px;z-index:19;display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.86rem;white-space:nowrap;cursor:pointer;color:var(--muted)}
+.tabs button.on{background:var(--royal);border-color:var(--royal);color:#fff}
+.tabs .ct{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--cran);color:#fff;font-size:.72rem}
+main{width:min(980px,100%);margin:0 auto;padding:18px 16px 80px}
+h2{font-size:1.3rem;margin:6px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.grid2{display:grid;gap:12px}@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
+.grid4{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}@media(min-width:640px){.grid4{grid-template-columns:repeat(4,1fr)}}
+label{display:grid;gap:5px;font-size:.8rem;font-weight:700;color:var(--muted)}
+input,select,textarea{width:100%;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;font-size:1rem}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--azure)}
+textarea{min-height:90px;resize:vertical}
+.btn{border:0;border-radius:999px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--royal);color:#fff}
+.btn.gold{background:var(--gold);color:#1A1200}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:.8rem}.btn.red{background:var(--cran)}
+.btn:disabled{opacity:.6}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.kpi b{font-size:1.8rem;font-weight:800;color:var(--royal);display:block}
+@media (prefers-color-scheme:dark){.kpi b{color:var(--gold)}}
+.kpi span{font-size:.8rem;color:var(--muted);font-weight:700}
+.item{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none;background:var(--line)}
+.item .tx{flex:1;min-width:0}.item .tx b{display:block;overflow:hidden;text-overflow:ellipsis}
+.item .tx small{color:var(--muted)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.sug{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;background:var(--card)}
+.sug .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);margin-bottom:8px}
+.badge{font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--line);color:var(--ink)}
+.badge.new{background:var(--cran);color:#fff}.badge.read{background:var(--azure);color:#fff}.badge.done{background:var(--grass);color:#fff}
+.sug p{white-space:pre-wrap}
+.drop{border:2px dashed var(--line);border-radius:18px;padding:26px;text-align:center;cursor:pointer;color:var(--muted);transition:.2s}
+.drop.over{border-color:var(--azure);background:rgba(0,103,200,.06)}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
+.gi{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:1;background:var(--line)}
+.gi img{width:100%;height:100%;object-fit:cover}
+.gi .del{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+.gi input{position:absolute;left:6px;right:6px;bottom:6px;width:auto;font-size:.75rem;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.92);color:#000;border:0}
+.prog{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}.prog i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.thumb{display:flex;align-items:center;gap:10px}.thumb img{width:56px;height:56px;border-radius:10px;object-fit:cover}
+.filt{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:99}
+.toast.show{opacity:1}
+.demo{background:var(--cran);color:#fff;text-align:center;font-size:.8rem;font-weight:700;padding:6px}
+.muted{color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <form id="loginF">
+    <h1>Club admin</h1>
+    <p id="loginHint">Sign in to manage the Rotary Club of Bhatagram website.</p>
+    <label>Email<input name="email" type="email" required autocomplete="username"></label>
+    <label>Password<input name="pw" type="password" required autocomplete="current-password"></label>
+    <button class="btn" type="submit">Sign in</button>
+    <button class="btn ghost" type="button" id="forgot">Forgot password</button>
+    <a href="index.html" class="muted">← Back to website</a>
+  </form>
+</div>
+
+<div id="app" class="hide">
+  <div class="demo hide" id="demoBar">Preview mode: changes are saved only in this browser. Add your Firebase keys to js/config.js to go live.</div>
+  <header><div><b>RC Bhatagram</b><small id="who"></small></div><span class="sp"></span>
+    <a class="btn gold sm" href="index.html" target="_blank" style="text-decoration:none">View site</a>
+    <button class="btn ghost sm" id="out" style="color:#fff;border-color:rgba(255,255,255,.4)">Sign out</button></header>
+  <nav class="tabs" id="tabs">
+    <button data-v="dash" class="on">Dashboard</button>
+    <button data-v="sug">Suggestions<span class="ct hide" id="ctS"></span></button>
+    <button data-v="join">Join requests<span class="ct hide" id="ctJ"></span></button>
+    <button data-v="projects">Projects</button>
+    <button data-v="events">Events</button>
+    <button data-v="gallery">Gallery</button>
+    <button data-v="members">Team</button>
+    <button data-v="settings">Settings</button>
+  </nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const R=window.RCData;
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);};
+const when=ts=>ts?new Date(ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+const AREAS={peace:"Promoting peace",disease:"Fighting disease",water:"Clean water & sanitation",mothers:"Mothers & children",education:"Supporting education",economy:"Local economies",environment:"Protecting the environment",fellowship:"Fellowship"};
+if(!R.live){$("#loginHint").textContent="Preview mode: any email, password demo";$("#demoBar").classList.remove("hide");}
+
+/* ---------- Auth ---------- */
+$("#loginF").onsubmit=async e=>{e.preventDefault();const f=e.target;try{await R.auth.signIn(f.email.value.trim(),f.pw.value);if(!R.live)start({email:f.email.value});}catch(err){toast(err.message.replace("Firebase: ",""));}};
+$("#forgot").onclick=async()=>{const em=$("#loginF").email.value.trim();if(!em)return toast("Type your email first");try{await R.auth.reset(em);toast("Reset link sent if the account exists");}catch(e){toast(e.message);}};
+$("#out").onclick=async()=>{await R.auth.signOut();location.reload();};
+R.auth.onChange(u=>u?start(u):($("#login").classList.remove("hide"),$("#app").classList.add("hide")));
+
+let started=false;
+function start(u){if(started)return;started=true;$("#who").textContent=u.email;$("#login").classList.add("hide");$("#app").classList.remove("hide");go("dash");}
+
+/* ---------- Router ---------- */
+$$("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+function go(v){$$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#main").innerHTML='<p class="muted">Loading…</p>';
+  (V[v]()).catch(e=>{console.error(e);$("#main").innerHTML=`<div class="card">Could not load: ${esc(e.message)}<br><span class="muted">If you just connected Firebase, check that your email is listed in firestore.rules.</span></div>`;});}
+async function counts(){const[s,j]=await Promise.all([R.list("suggestions"),R.list("joinRequests")]);
+  const ns=s.filter(x=>x.status==="new").length,nj=j.filter(x=>x.status==="new").length;
+  $("#ctS").textContent=ns;$("#ctS").classList.toggle("hide",!ns);$("#ctJ").textContent=nj;$("#ctJ").classList.toggle("hide",!nj);return{s,j,ns,nj};}
+
+/* upload helper: returns url */
+async function up(file,bar){try{return await R.upload(file,p=>bar&&(bar.style.width=(p*100)+"%"));}catch(e){toast("Upload failed: "+e.message);throw e;}}
+function csv(rows,cols,name){const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const body=[cols.join(",")].concat(rows.map(r=>cols.map(c=>q(c==="createdAt"?when(r[c]):r[c])).join(","))).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+body],{type:"text/csv"}));a.download=name;a.click();}
+
+const V={};
+
+/* ---------- Dashboard ---------- */
+V.dash=async()=>{const {s,j,ns,nj}=await counts();const[p,e,g]=await Promise.all([R.list("projects"),R.list("events"),R.list("gallery")]);
+  $("#main").innerHTML=`<h2>Dashboard</h2><div class="grid4">
+   <div class="kpi"><b>${ns}</b><span>New suggestions</span></div><div class="kpi"><b>${nj}</b><span>New join requests</span></div>
+   <div class="kpi"><b>${p.length}</b><span>Projects</span></div><div class="kpi"><b>${g.length}</b><span>Photos</span></div></div>
+   <div class="card" style="margin-top:14px"><b>Latest suggestions</b>${s.slice(0,4).map(x=>`<div class="item"><div class="tx"><b>${esc(x.message)}</b><small>${esc(x.type)} · ${when(x.createdAt)}</small></div><span class="badge ${x.status}">${x.status}</span></div>`).join("")||'<p class="muted">None yet.</p>'}</div>
+   <div class="card"><b>Quick actions</b><div class="acts" style="justify-content:flex-start;margin-top:10px">
+    <button class="btn sm" onclick="document.querySelector('[data-v=gallery]').click()">Upload photos</button>
+    <button class="btn sm" onclick="document.querySelector('[data-v=projects]').click()">Add project</button>
+    <button class="btn sm" onclick="document.querySelector('[data-v=events]').click()">Add event</button>
+    <button class="btn sm gold" onclick="document.querySelector('[data-v=settings]').click()">Update charter progress</button></div></div>`;};
+
+/* ---------- Inbox (suggestions / join) ---------- */
+function inbox(col,title,render,cols){return async()=>{let all=await R.list(col),f="all";
+  const draw=()=>{const L=all.filter(x=>f==="all"||x.status===f);
+    $("#main").innerHTML=`<h2>${title}</h2><div class="filt">${["all","new","read","done"].map(k=>`<button class="btn sm ${k===f?"":"ghost"}" data-f="${k}">${k} (${k==="all"?all.length:all.filter(x=>x.status===k).length})</button>`).join("")}
+      <span style="flex:1"></span><button class="btn sm ghost" id="exp">Export CSV</button></div>`+
+      (L.map(x=>`<div class="sug" data-id="${esc(x.id)}"><div class="hd"><span class="badge ${x.status}">${x.status}</span>${render.head(x)}<span>${when(x.createdAt)}</span></div>${render.body(x)}
+        <div class="acts" style="margin-top:10px">${x.status!=="read"?`<button class="btn sm ghost" data-s="read">Mark read</button>`:""}${x.status!=="done"?`<button class="btn sm" data-s="done">Mark done</button>`:""}<button class="btn sm red" data-del>Delete</button></div></div>`).join("")||'<p class="muted">Nothing here.</p>');
+    $$(".filt [data-f]").forEach(b=>b.onclick=()=>{f=b.dataset.f;draw();});
+    $("#exp").onclick=()=>csv(all,cols,col+".csv");
+    $$(".sug").forEach(c=>{const id=c.dataset.id;
+      $$("[data-s]",c).forEach(b=>b.onclick=async()=>{await R.update(col,id,{status:b.dataset.s});all.find(x=>x.id===id).status=b.dataset.s;draw();counts();});
+      $("[data-del]",c).onclick=async()=>{if(!confirm("Delete permanently?"))return;await R.remove(col,id);all=all.filter(x=>x.id!==id);draw();counts();};});};
+  draw();counts();};}
+V.sug=inbox("suggestions","Suggestion box",{
+  head:x=>`<b>${esc(x.type)}</b><span>${x.anonymous?"Anonymous":esc(x.name||"No name")}${x.contact?" · "+esc(x.contact):""}</span>`,
+  body:x=>`<p>${esc(x.message)}</p>`},["createdAt","type","message","name","contact","anonymous","status"]);
+V.join=inbox("joinRequests","Join requests",{
+  head:x=>`<b>${esc(x.name)}</b><a href="tel:${esc(x.phone)}">${esc(x.phone)}</a>${x.phone?`<a href="https://wa.me/${esc((x.phone.replace(/\D/g,"").length===10?"91":"")+x.phone.replace(/\D/g,""))}" target="_blank">WhatsApp</a>`:""}`,
+  body:x=>`<p class="muted">${[x.email,x.profession,AREAS[x.interest]].filter(Boolean).map(esc).join(" · ")}</p>${x.message?`<p>${esc(x.message)}</p>`:""}`},
+  ["createdAt","name","phone","email","profession","interest","message","status"]);
+
+/* ---------- Generic list + add form ---------- */
+function crud(col,title,fields,opt){return async()=>{
+  const all=await R.list(col,opt.sort);
+  $("#main").innerHTML=`<h2>${title}</h2><form class="card" id="cf"><div class="grid2">${fields.map(f=>f.type==="image"
+      ?`<label style="grid-column:1/-1">${f.label}<input type="file" accept="image/*" name="${f.k}"><div class="prog"><i></i></div></label>`
+      :f.type==="select"?`<label>${f.label}<select name="${f.k}">${Object.entries(f.opts).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label>`
+      :f.type==="textarea"?`<label style="grid-column:1/-1">${f.label}<textarea name="${f.k}"></textarea></label>`
+      :`<label>${f.label}<input name="${f.k}" type="${f.type||"text"}" ${f.req?"required":""} placeholder="${f.ph||""}"></label>`).join("")}</div>
+    <div class="acts" style="margin-top:14px"><button class="btn" type="submit">Add</button></div></form>
+    <div class="card" id="list">${all.map(x=>`<div class="item" data-id="${esc(x.id)}">${opt.img(x)?`<img src="${esc(R.img(opt.img(x),200))}" alt="">`:""}<div class="tx"><b>${esc(opt.t(x))}</b><small>${esc(opt.s(x))}</small></div><div class="acts"><button class="btn sm red">Delete</button></div></div>`).join("")||'<p class="muted">Nothing added yet.</p>'}</div>`;
+  $("#cf").onsubmit=async e=>{e.preventDefault();const f=e.target,btn=$("button[type=submit]",f);btn.disabled=true;btn.textContent="Saving…";
+    try{const d={};for(const fd of fields){if(fd.type==="image"){const file=f[fd.k].files[0];d[fd.k]=file?await up(file,$(".prog i",f)):"";}else d[fd.k]=fd.type==="number"?+f[fd.k].value||0:fd.k==="tentative"?!!f[fd.k].value:f[fd.k].value.trim();}
+      await R.add(col,d);toast("Added");V[opt.view]();}catch(err){console.error(err);toast("Could not save: "+err.message);btn.disabled=false;btn.textContent="Add";}};
+  $$("#list .item").forEach(it=>$("button",it).onclick=async()=>{if(!confirm("Delete this item?"))return;await R.remove(col,it.dataset.id);it.remove();toast("Deleted");});};}
+
+V.projects=crud("projects","Projects",[
+  {k:"title",label:"Project title",req:1},{k:"area",label:"Area of focus",type:"select",opts:Object.fromEntries(Object.entries(AREAS).filter(([k])=>k!=="fellowship"))},
+  {k:"date",label:"Date",type:"date",req:1},{k:"impact",label:"Impact (short)",ph:"e.g. 200 saplings"},
+  {k:"summary",label:"Summary",type:"textarea"},{k:"image",label:"Cover photo",type:"image"}],
+  {view:"projects",sort:{by:"date",dir:"desc"},img:x=>x.image,t:x=>x.title,s:x=>[x.date,AREAS[x.area],x.impact].filter(Boolean).join(" · ")});
+
+V.events=crud("events","Events & meetings",[
+  {k:"title",label:"Event title",req:1},{k:"venue",label:"Venue"},{k:"date",label:"Date",type:"date",req:1},{k:"time",label:"Time",type:"time"},
+  {k:"tentative",label:"Date confirmed?",type:"select",opts:{"":"Yes, confirmed","1":"Not yet (shows 'To be confirmed')"}},
+  {k:"description",label:"Details",type:"textarea"}],
+  {view:"events",sort:{by:"date",dir:"asc"},img:()=>"",t:x=>x.title,s:x=>[x.date,x.time,x.venue].filter(Boolean).join(" · ")});
+
+V.members=crud("members","Team / board",[
+  {k:"name",label:"Name",req:1},{k:"role",label:"Role",ph:"President, Secretary…"},{k:"order",label:"Display order",type:"number",ph:"1 = first"},
+  {k:"photo",label:"Photo (square works best)",type:"image"}],
+  {view:"members",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.name,s:x=>x.role||""});
+
+/* ---------- Gallery: multi-upload ---------- */
+V.gallery=async()=>{let all=await R.list("gallery");
+  $("#main").innerHTML=`<h2>Gallery</h2><div class="card"><label class="drop" id="drop"><input type="file" accept="image/*" multiple hidden id="gf">
+    <b>Tap to choose photos</b><br><span class="muted">or drag &amp; drop · several at once · resized automatically</span></label><div id="q"></div></div>
+    <div class="card"><b>${all.length} photos</b> <span class="muted">· edit a caption and tap outside to save</span><div class="ggrid" id="gg"></div></div>`;
+  const drawG=()=>{$("#gg").innerHTML=all.map(g=>`<div class="gi" data-id="${esc(g.id)}"><img src="${esc(R.img(g.url,300))}" alt="" loading="lazy"><button class="del" aria-label="Delete">✕</button><input value="${esc(g.caption||"")}" placeholder="Caption"></div>`).join("");
+    $$("#gg .gi").forEach(el=>{const id=el.dataset.id;
+      $(".del",el).onclick=async()=>{if(!confirm("Delete photo?"))return;await R.remove("gallery",id);all=all.filter(x=>x.id!==id);drawG();};
+      $("input",el).onchange=async e=>{await R.update("gallery",id,{caption:e.target.value.trim()});toast("Caption saved");};});};
+  drawG();
+  const handle=async files=>{for(const file of [...files]){if(!file.type.startsWith("image/"))continue;
+      const row=document.createElement("div");row.className="thumb";row.style.marginTop="10px";row.innerHTML=`<img src="${URL.createObjectURL(file)}"><div style="flex:1"><small>${esc(file.name)}</small><div class="prog"><i></i></div></div>`;$("#q").appendChild(row);
+      try{const url=await up(file,$(".prog i",row));await R.add("gallery",{url,caption:""});row.remove();all=await R.list("gallery");drawG();}catch(e){row.style.opacity=.5;}}
+    toast("Upload finished");};
+  $("#gf").onchange=e=>handle(e.target.files);
+  const d=$("#drop");["dragover","dragenter"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("over");}));
+  d.addEventListener("drop",e=>handle(e.dataTransfer.files));};
+
+/* ---------- Settings ---------- */
+V.settings=async()=>{const S=await R.getSettings(),ch=S.charter||{};
+  const st=Array.isArray(S.stats)?S.stats:R.seed.settings.stats;
+  const STAGES=["Founding group formed","Orientation with senior Rotarians","Name and first board chosen","Charter paperwork and dues","Installation ceremony (club chartered)"];
+  const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const i=(k,l,v,t,ph)=>`<label>${l}<input name="${k}" type="${t||"text"}" value="${esc(v==null?"":v)}" placeholder="${ph||""}"></label>`;
+  $("#main").innerHTML=`<h2>Settings</h2><form id="sf">
+   ${R.live?`<div class="card"><b>First time going live?</b><p class="muted" style="margin:4px 0 12px">Loads the club's starter details (meeting info, board, installation event) into the database. Safe to run once.</p><button class="btn gold" type="button" id="seed">Load starter content</button></div>`:""}
+   <div class="card"><b>Charter progress</b><p class="muted" style="margin:4px 0 12px">Shown on the home page timeline and the floating event card.</p><div class="grid2">
+     ${i("c_current","Founding members so far",ch.current,"number")}${i("c_target","Members needed for charter",ch.target||20,"number")}
+     <label style="grid-column:1/-1">Current stage<select name="c_stage">${STAGES.map((s,n)=>`<option value="${n}" ${+ch.stage===n?"selected":""}>${n+1}. ${s}</option>`).join("")}</select></label></div></div>
+   <div class="card"><b>Numbers on the home page</b><p class="muted" style="margin:4px 0 12px">Four figures under "Why Bhatagram?". Leave a label empty to hide it.</p>
+     ${[0,1,2,3].map(n=>`<div class="grid2" style="grid-template-columns:110px 1fr;margin-bottom:10px">${i("sv"+n,"Number",(st[n]||{}).v,"number")}${i("sl"+n,"Label",(st[n]||{}).l)}</div>`).join("")}</div>
+   <div class="card"><b>Home page and meetings</b><div class="grid2" style="margin-top:12px">
+     <label style="grid-column:1/-1">Intro paragraph<textarea name="intro">${esc(S.intro||"")}</textarea></label>
+     <label>Meeting day<select name="meetingWeekday">${DAYS.map((d,n)=>`<option value="${n}" ${+(S.meetingWeekday==null?3:S.meetingWeekday)===n?"selected":""}>${d}</option>`).join("")}</select></label>
+     ${i("meetingTime","Meeting time",S.meetingTime||"19:00","time")}
+     <label style="grid-column:1/-1">Meeting venue<input name="meetingVenue" value="${esc(S.meetingVenue||"")}"></label></div></div>
+   <div class="card"><b>Contact and social</b><div class="grid2" style="margin-top:12px">
+     ${i("email","Email",S.email,"email")}${i("phone","Phone",S.phone,"tel")}${i("whatsapp","WhatsApp number",S.whatsapp,"tel","91XXXXXXXXXX")}
+     ${i("instagram","Instagram link",S.instagram,"url")}${i("facebook","Facebook link",S.facebook,"url")}</div></div>
+   <button class="btn gold" type="submit" style="width:100%">Save settings</button>
+   ${R.live?"":'<button class="btn ghost" type="button" id="rst" style="width:100%;margin-top:10px">Reset preview data</button>'}</form>`;
+  $("#sf").onsubmit=async e=>{e.preventDefault();const f=e.target,n=k=>+f[k].value||0,wd=+f.meetingWeekday.value;
+    const d={intro:f.intro.value.trim(),meetingWeekday:wd,meetingDay:"Every "+DAYS[wd],meetingTime:f.meetingTime.value,meetingVenue:f.meetingVenue.value.trim(),
+      email:f.email.value.trim(),phone:f.phone.value.trim(),whatsapp:f.whatsapp.value.trim(),instagram:f.instagram.value.trim(),facebook:f.facebook.value.trim(),
+      stats:[0,1,2,3].map(k=>({v:n("sv"+k),l:f["sl"+k].value.trim()})),
+      charter:{current:n("c_current"),target:n("c_target")||20,stage:n("c_stage")}};
+    try{await R.saveSettings(d);toast("Settings saved");}catch(err){toast("Settings not saved: "+err.message);}};
+  const sd=$("#seed");if(sd)sd.onclick=async()=>{sd.disabled=true;sd.textContent="Loading…";try{await R.loadSeed();toast("Starter content loaded");V.settings();}catch(e){toast("Not loaded: "+e.message);sd.disabled=false;}};
+  const r=$("#rst");if(r)r.onclick=()=>{if(confirm("Restore the starter content? Your preview changes will be lost.")){R.resetDemo();toast("Preview reset");V.settings();}};};
+})();
+</script>
+</body>
+</html>
