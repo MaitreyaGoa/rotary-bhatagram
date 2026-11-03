@@ -1,5 +1,5 @@
 /* ============================================================
-   Design switch: Dawn (index.html) <-> Classic (index-classic.html)
+   Design switch: Classic (index.html, default) <-> Dawn (dawn.html)
    - Remembers each visitor's choice on their device.
    - Opens the other design at the same section.
    - Hide it everywhere with RC_CONFIG.layoutSwitch = false.
@@ -7,7 +7,7 @@
 (function () {
   const C = window.RC_CONFIG || {};
   if (C.layoutSwitch === false) return;
-  const isClassic = /index-classic\.html$/i.test(location.pathname);
+  const isClassic = !/dawn\.html$/i.test(location.pathname);
   const KEY = "rcb_layout";
   // section ids that differ between the two designs
   const toClassic = { home: "top", meet: "events" }, toDawn = { top: "home", events: "meet" };
@@ -22,8 +22,8 @@
     try { localStorage.setItem(KEY, target); } catch (e) {}
     let id = currentSection();
     id = (target === "classic" ? toClassic : toDawn)[id] || id;
-    const page = target === "classic" ? "index-classic.html" : "./";
-    location.href = page + (target === "dawn" ? "?dawn" : "") + (id && id !== "home" && id !== "top" ? "#" + id : "");
+    const page = target === "classic" ? "./?classic" : "dawn.html";
+    location.href = page + (id && id !== "home" && id !== "top" ? "#" + id : "");
   }
 
   const css = `
@@ -45,7 +45,7 @@
     if (!hero) return;
     const box = document.createElement("div");
     box.className = "lay"; box.setAttribute("role", "group"); box.setAttribute("aria-label", "Choose website design");
-    box.innerHTML = `<span>Design</span><button type="button" data-l="dawn" aria-pressed="${!isClassic}">Dawn</button><button type="button" data-l="classic" aria-pressed="${isClassic}">Classic</button>`;
+    box.innerHTML = `<span>Design</span><button type="button" data-l="classic" aria-pressed="${isClassic}">Classic</button><button type="button" data-l="dawn" aria-pressed="${!isClassic}">Dawn</button>`;
     box.addEventListener("click", e => { const b = e.target.closest("button[data-l]"); if (b && b.getAttribute("aria-pressed") !== "true") go(b.dataset.l); });
     hero.appendChild(box);
     const bar = document.querySelector("footer .bar");
