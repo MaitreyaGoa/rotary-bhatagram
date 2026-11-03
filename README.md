@@ -4,12 +4,12 @@ Static website for GitHub Pages. Firebase stores suggestions, join requests and 
 Rotary International District 3170, Bicholim taluka, Goa.
 
 ```
-index.html        public website ("Dawn over Bhatagram" design)
-index-classic.html  the earlier design, kept for comparison (delete it if you don't need it)
+index.html        public website, Classic design (the default)
+dawn.html         the Dawn design (visitors switch with the Classic | Dawn button)
 admin.html        admin panel (yourdomain/admin.html)
 js/config.js      the ONLY file you edit to go live
 js/data.js        data layer + starter club content
-js/switch.js      the Dawn | Classic design switch (hide it: add layoutSwitch: false in config.js)
+js/switch.js      the Classic | Dawn design switch (hide it: add layoutSwitch: false in config.js)
 firestore.rules   security rules to paste into Firebase
 assets/           put the official club logo here (logo.png)
 CNAME             your domain (rcbhatagram.com), already filled in
