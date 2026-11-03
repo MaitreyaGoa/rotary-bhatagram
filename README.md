@@ -4,7 +4,8 @@ Static website for GitHub Pages. Firebase stores suggestions, join requests and 
 Rotary International District 3170, Bicholim taluka, Goa.
 
 ```
-index.html        public website
+index.html        public website ("Dawn over Bhatagram" design)
+index-classic.html  the earlier design, kept for comparison (delete it if you don't need it)
 admin.html        admin panel (yourdomain/admin.html)
 js/config.js      the ONLY file you edit to go live
 js/data.js        data layer + starter club content
@@ -44,9 +45,10 @@ Until `js/config.js` has Firebase keys, the site runs in **preview mode**: it sh
 10. At console.firebase.google.com, click **Add project** and name it `rotary-bhatagram`. You can turn Analytics off.
 11. Go to **Build → Firestore Database → Create database**. Choose location **asia-south1 (Mumbai)** and **production mode**.
 12. Go to **Build → Authentication → Get started** and enable **Email/Password**.
-    - **Users** tab → **Add user** for each admin (email + password).
+    - **Users** tab → **Add user**: email `rcbhatagram@gmail.com` and a strong password.
+    - **Settings → User actions** → untick **Enable create (sign-up)** and save, so nobody else can create an account.
     - **Settings → Authorized domains** → add `rcbhatagram.com`, `www.rcbhatagram.com` and `<your-username>.github.io`.
-13. Go to **Firestore → Rules**, paste the contents of `firestore.rules`, and replace `'admin@example.com'` with your admin emails, e.g. `['first@gmail.com', 'second@gmail.com']`. Click **Publish**.
+13. Go to **Firestore → Rules**, paste the whole contents of `firestore.rules` (the admin email `rcbhatagram@gmail.com` is already in it). Click **Publish**.
 14. Go to **Project settings (⚙) → General → Your apps → Web `</>`** and register the app. Copy the six values from `firebaseConfig`.
 15. At cloudinary.com, sign up for free and note your **Cloud name**. Then go to **Settings → Upload → Upload presets → Add**:
     - Signing mode: **Unsigned**
