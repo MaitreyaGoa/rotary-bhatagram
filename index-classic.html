@@ -303,6 +303,19 @@ section{padding:clamp(72px,10vw,120px) 0}
 .person b{display:block;font-size:1.02rem;line-height:1.3}
 .person span{font-size:.86rem;color:var(--ink-2)}
 
+.person{align-items:flex-start}
+.person em{display:block;font-style:normal;font-size:.82rem;font-weight:700;color:var(--royal);margin-bottom:2px}
+@media (prefers-color-scheme:dark){.person em{color:var(--gold)}}
+.person span{display:block;margin-top:4px;line-height:1.45}
+.person.open{background:transparent;box-shadow:inset 0 0 0 1.5px var(--rule);border:1.5px dashed var(--rule);box-shadow:none}
+.person.open .av{background:transparent;color:var(--ink-2);box-shadow:0 0 0 2px var(--rule)}
+.person.open b{color:var(--ink-2)}
+.gh{font-family:var(--text);font-size:1rem;font-weight:700;color:var(--ink-2);margin:34px 0 14px}
+.filled{display:flex;flex-wrap:wrap;align-items:center;gap:14px;color:var(--ink-2);font-size:.95rem;margin-top:-20px}
+.filled b{color:var(--ink)}
+.fb{flex:1;min-width:160px;max-width:320px;height:8px;border-radius:99px;background:var(--rule);overflow:hidden}
+.fb i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--royal),var(--gold))}
+
 /* ---------- Voice ---------- */
 .voice-sec{background:var(--surface);border-top:1px solid var(--rule)}
 .voice{display:grid;gap:36px}
@@ -352,7 +365,7 @@ footer a{display:block;text-decoration:none;padding:4px 0}
 footer a:hover{color:var(--gold)}
 footer .motto{font-family:var(--display);font-size:1.7rem;color:#fff;font-weight:600;margin:12px 0 8px}
 footer .bar{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:20px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:.84rem}
-.preview{position:fixed;right:14px;top:80px;z-index:50;font-size:.74rem;font-weight:700;background:var(--cranberry);color:#fff;padding:6px 11px;border-radius:999px;box-shadow:var(--shadow-md)}
+.preview{position:fixed;left:12px;top:80px;z-index:50;font-size:.74rem;font-weight:700;background:var(--cranberry);color:#fff;padding:6px 11px;border-radius:999px;box-shadow:var(--shadow-md)}
 @media (min-width:960px){.preview{top:auto;right:auto;left:16px;bottom:20px}}
 </style>
 </head>
@@ -478,8 +491,9 @@ footer .bar{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-t
 
 <section id="board" style="padding-top:0">
   <div class="wrap">
-    <div class="head"><h2>Board 2026–27</h2></div>
-    <div class="board" id="boardGrid"></div>
+    <div class="head"><h2>Board 2026–27</h2><p class="lead">The members who run the club this Rotary year, July 2026 to June 2027.</p></div>
+    <div class="filled" id="filled"></div>
+    <div id="boardGroups"></div>
   </div>
 </section>
 
@@ -573,6 +587,7 @@ footer .bar{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-t
 
 <script src="js/config.js"></script>
 <script src="js/data.js"></script>
+<script src="js/switch.js"></script>
 <script>
 (function(){
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -693,7 +708,7 @@ async function load(){
   let S={},P=[],E=[],G=[],M=[];
   try{[S,P,E,G,M]=await Promise.all([R.getSettings(),R.list("projects",{by:"date",dir:"desc"}),R.list("events",{by:"date",dir:"asc"}),R.list("gallery"),R.list("members",{by:"order",dir:"asc"})]);}
   catch(e){console.error("Load failed",e);S=R.seed.settings;}
-  S=S||{};const ch=S.charter||{},C=window.RC_CONFIG.club||{};
+  S=S||{};({E,M}=R.withSeed(S,E,M));const ch=S.charter||{},C=window.RC_CONFIG.club||{};
   const mTime=t12(S.meetingTime||"19:00"),mDay=S.meetingDay||"Every Wednesday",venue=S.meetingVenue||"Bicholim";
 
   $("#heroIntro").textContent=S.intro||R.seed.settings.intro;
@@ -763,7 +778,12 @@ async function load(){
   else $$('[data-need="gallery"]').forEach(a=>a.remove());
 
   /* board */
-  $("#boardGrid").innerHTML=M.map(m=>`<div class="person"><div class="av">${m.photo?`<img src="${esc(R.img(m.photo,240))}" alt="" loading="lazy">`:esc(ini(m.name))}</div><div><b>${esc(m.name)}</b><span>${esc(m.role||"")}</span></div></div>`).join("")||`<p class="lead">Our board will be listed here soon.</p>`;
+  const GROUPS=[["officers","Office bearers"],["chairs","Committee chairs"]];
+  const filledN=M.filter(m=>(m.name||"").trim()).length;
+  $("#filled").innerHTML=M.length?`<span><b>${filledN} of ${M.length}</b> roles filled</span><span class="fb"><i style="width:${Math.round(filledN/M.length*100)}%"></i></span>`:"";
+  const card=m=>{const open=!(m.name||"").trim();return `<div class="person${open?" open":""}"><div class="av">${open?"?":m.photo?`<img src="${esc(R.img(m.photo,240))}" alt="" loading="lazy">`:esc(ini(m.name))}</div><div><em>${esc(m.role||"")}</em><b>${open?"To be announced":esc(m.name)}</b>${m.duty?`<span>${esc(m.duty)}</span>`:""}</div></div>`;};
+  const groups=GROUPS.map(([k,t])=>[t,M.filter(m=>(m.group||"officers")===k)]).filter(g=>g[1].length);
+  $("#boardGroups").innerHTML=M.length?groups.map(([t,L])=>`<h3 class="gh">${t}</h3><div class="board">${L.map(card).join("")}</div>`).join(""):`<p class="lead">Our board will be listed here soon.</p>`;
 
   /* contacts */
   const em=S.email||C.email,ph=S.phone||C.phone,wa=S.whatsapp||C.whatsapp;let fc="";

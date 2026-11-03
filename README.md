@@ -9,6 +9,7 @@ index-classic.html  the earlier design, kept for comparison (delete it if you do
 admin.html        admin panel (yourdomain/admin.html)
 js/config.js      the ONLY file you edit to go live
 js/data.js        data layer + starter club content
+js/switch.js      the Dawn | Classic design switch (hide it: add layoutSwitch: false in config.js)
 firestore.rules   security rules to paste into Firebase
 assets/           put the official club logo here (logo.png)
 CNAME             your domain (rcbhatagram.com), already filled in

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Rotary Club of Bhatagram | Bicholim, Goa | District 3170</title>
 <meta name="description" content="Rotary Club of Bhatagram, a new Rotary club of young professionals in Bicholim taluka, Goa (Rotary International District 3170). Meetings every Wednesday. Share an idea or ask to join.">
+<script>try{if(localStorage.getItem("rcb_layout")==="classic"&&!/[?&]dawn/.test(location.search))location.replace("index-classic.html"+location.hash);}catch(e){}</script>
 <meta name="theme-color" content="#06163A">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Rotary Club of Bhatagram">
@@ -314,6 +315,32 @@ dialog.lb::backdrop{background:rgba(2,8,22,.93);backdrop-filter:blur(14px)}
 .per b{display:block;font-size:1.14rem;line-height:1.25}
 .per span{font-size:.94rem;color:var(--ink-2)}
 
+/* ---------- Board: office bearers + chairs ---------- */
+.bhead{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:20px}
+.filled{min-width:240px;max-width:340px;flex:1}
+.filled .l{display:flex;justify-content:space-between;font-size:.95rem;color:var(--ink-2);font-weight:500}
+.filled .l b{color:var(--ink);font-weight:600}
+.filled .bar{height:8px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}
+.filled .bar i{display:block;height:100%;width:var(--w);border-radius:99px;background:linear-gradient(90deg,var(--royal),var(--gold));transition:width 1.2s var(--ease)}
+.grp{margin-top:44px}
+.grp h3{font-size:1.05rem;font-weight:600;color:var(--ink-2);letter-spacing:0;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.grp h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.roles{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.role{position:relative;display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start;padding:20px;border-radius:var(--r-lg);background:var(--card);box-shadow:0 24px 50px -36px rgba(6,22,58,.5);transition:transform .4s var(--ease),box-shadow .4s}
+.role:hover{transform:translateY(-4px);box-shadow:0 34px 60px -36px rgba(6,22,58,.6)}
+.role .pic{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:1.35rem;font-weight:700;color:#fff;background:linear-gradient(140deg,var(--royal-2),var(--night));position:relative}
+.role .pic img{width:100%;height:100%;object-fit:cover;border-radius:20px}
+.role .pic::after{content:"";position:absolute;right:-5px;bottom:-5px;width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--card)}
+.role .rl{font-size:.86rem;font-weight:600;color:var(--royal);line-height:1.3}
+@media (prefers-color-scheme:dark){.role .rl{color:var(--gold-2)}}
+.role b{display:block;font-size:1.18rem;line-height:1.25;margin:3px 0 6px}
+.role p{font-size:.92rem;color:var(--ink-2);line-height:1.45}
+.role.open{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);background-image:repeating-linear-gradient(135deg,transparent 0 10px,rgba(23,69,143,.035) 10px 20px)}
+.role.open:hover{transform:none;box-shadow:inset 0 0 0 1.5px var(--line)}
+.role.open .pic{background:transparent;color:var(--ink-2);box-shadow:inset 0 0 0 2px var(--line);font-size:1.5rem}
+.role.open .pic::after{display:none}
+.role.open b{color:var(--ink-2);font-weight:600}
+
 /* ---------- Voice band ---------- */
 .voice{background:radial-gradient(70% 90% at 100% 0%,#FFE09E,transparent 60%),linear-gradient(140deg,var(--gold),#F29A0E);color:#1D1300;border-radius:var(--r-xl);padding:clamp(30px,6vw,64px);display:grid;gap:28px;position:relative;overflow:hidden}
 @media (min-width:900px){.voice{grid-template-columns:1.2fr .8fr;align-items:end}}
@@ -524,8 +551,8 @@ footer .bar{margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,255,2
 
 <section class="sec light" id="board">
   <div class="wrap">
-    <h2 class="h2">Board 2026–27</h2>
-    <div class="people" id="people"></div>
+    <div class="bhead"><div><h2 class="h2">Board 2026–27</h2><p class="sub">The members who run the club this Rotary year, July 2026 to June 2027.</p></div><div class="filled" id="filled"></div></div>
+    <div id="boardGroups"></div>
   </div>
 </section>
 
@@ -614,6 +641,7 @@ footer .bar{margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,255,2
 
 <script src="js/config.js"></script>
 <script src="js/data.js"></script>
+<script src="js/switch.js"></script>
 <script>
 (function(){
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -734,7 +762,7 @@ async function load(){
   let S={},P=[],E=[],G=[],M=[];
   try{[S,P,E,G,M]=await Promise.all([R.getSettings(),R.list("projects",{by:"date",dir:"desc"}),R.list("events",{by:"date",dir:"asc"}),R.list("gallery"),R.list("members",{by:"order",dir:"asc"})]);}
   catch(e){console.error("Load failed",e);S=R.seed.settings;}
-  S=S||{};const ch=S.charter||{},C=window.RC_CONFIG.club||{};
+  S=S||{};({E,M}=R.withSeed(S,E,M));const ch=S.charter||{},C=window.RC_CONFIG.club||{};
   const mt=S.meetingTime||"19:00",mDay=S.meetingDay||"Every Wednesday",venue=S.meetingVenue||"Bicholim",wd=S.meetingWeekday==null?3:+S.meetingWeekday;
   $("#heroIntro").textContent=S.intro||R.seed.settings.intro;
   $("#fMeet").textContent="Meetings: "+mDay+" at "+t12(mt)+", "+venue;
@@ -791,7 +819,12 @@ async function load(){
   else $$('[data-need="gallery"]').forEach(a=>a.remove());
 
   const ini=n=>(n||"?").replace(/^(Dr|Adv|CA|Rtn)\.?\s+/i,"").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  $("#people").innerHTML=M.map(m=>`<div class="per"><div class="av">${m.photo?`<img src="${esc(R.img(m.photo,300))}" alt="" loading="lazy">`:esc(ini(m.name))}</div><div><b>${esc(m.name)}</b><span>${esc(m.role||"")}</span></div></div>`).join("")||`<p class="sub">Our board will be listed here soon.</p>`;
+  const GROUPS=[["officers","Office bearers"],["chairs","Committee chairs"]];
+  const filledN=M.filter(m=>(m.name||"").trim()).length;
+  $("#filled").innerHTML=M.length?`<div class="l"><span>Roles filled</span><b>${filledN} of ${M.length}</b></div><div class="bar"><i style="--w:${Math.round(filledN/M.length*100)}%"></i></div>`:"";
+  const card=m=>{const open=!(m.name||"").trim();return `<div class="role${open?" open":""}"><div class="pic">${open?"?":m.photo?`<img src="${esc(R.img(m.photo,300))}" alt="" loading="lazy">`:esc(ini(m.name))}</div><div><span class="rl">${esc(m.role||"")}</span><b>${open?"To be announced":esc(m.name)}</b>${m.duty?`<p>${esc(m.duty)}</p>`:""}</div></div>`;};
+  const groups=GROUPS.map(([k,t])=>[t,M.filter(m=>(m.group||"officers")===k)]).filter(g=>g[1].length);
+  $("#boardGroups").innerHTML=M.length?groups.map(([t,L])=>`<div class="grp"><h3>${t}</h3><div class="roles">${L.map(card).join("")}</div></div>`).join(""):`<p class="sub">Our board will be listed here soon.</p>`;
 
   const em=S.email||C.email,ph=S.phone||C.phone,wa=S.whatsapp||C.whatsapp;let fc="";
   if(em)fc+=`<a href="mailto:${esc(em)}">${esc(em)}</a>`;if(ph)fc+=`<a href="tel:${esc(ph.replace(/\s/g,""))}">${esc(ph)}</a>`;

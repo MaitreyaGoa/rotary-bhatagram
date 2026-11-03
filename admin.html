@@ -98,7 +98,7 @@ textarea{min-height:90px;resize:vertical}
     <button data-v="projects">Projects</button>
     <button data-v="events">Events</button>
     <button data-v="gallery">Gallery</button>
-    <button data-v="members">Team</button>
+    <button data-v="members">Board</button>
     <button data-v="settings">Settings</button>
   </nav>
   <main id="main"></main>
@@ -143,15 +143,16 @@ function csv(rows,cols,name){const q=v=>'"'+String(v==null?"":v).replace(/"/g,'"
 const V={};
 
 /* ---------- Dashboard ---------- */
-V.dash=async()=>{const {s,j,ns,nj}=await counts();const[p,e,g]=await Promise.all([R.list("projects"),R.list("events"),R.list("gallery")]);
+V.dash=async()=>{const {s,j,ns,nj}=await counts();const[p,e,g,mb]=await Promise.all([R.list("projects"),R.list("events"),R.list("gallery"),R.list("members",{by:"order",dir:"asc"})]);
   $("#main").innerHTML=`<h2>Dashboard</h2><div class="grid4">
    <div class="kpi"><b>${ns}</b><span>New suggestions</span></div><div class="kpi"><b>${nj}</b><span>New join requests</span></div>
-   <div class="kpi"><b>${p.length}</b><span>Projects</span></div><div class="kpi"><b>${g.length}</b><span>Photos</span></div></div>
+   <div class="kpi"><b>${mb.filter(m=>(m.name||"").trim()).length}/${mb.length}</b><span>Board roles filled</span></div><div class="kpi"><b>${g.length}</b><span>Photos</span></div></div>
    <div class="card" style="margin-top:14px"><b>Latest suggestions</b>${s.slice(0,4).map(x=>`<div class="item"><div class="tx"><b>${esc(x.message)}</b><small>${esc(x.type)} · ${when(x.createdAt)}</small></div><span class="badge ${x.status}">${x.status}</span></div>`).join("")||'<p class="muted">None yet.</p>'}</div>
    <div class="card"><b>Quick actions</b><div class="acts" style="justify-content:flex-start;margin-top:10px">
     <button class="btn sm" onclick="document.querySelector('[data-v=gallery]').click()">Upload photos</button>
     <button class="btn sm" onclick="document.querySelector('[data-v=projects]').click()">Add project</button>
     <button class="btn sm" onclick="document.querySelector('[data-v=events]').click()">Add event</button>
+    <button class="btn sm" onclick="document.querySelector('[data-v=members]').click()">Update board</button>
     <button class="btn sm gold" onclick="document.querySelector('[data-v=settings]').click()">Update charter progress</button></div></div>`;};
 
 /* ---------- Inbox (suggestions / join) ---------- */
@@ -175,20 +176,32 @@ V.join=inbox("joinRequests","Join requests",{
   body:x=>`<p class="muted">${[x.email,x.profession,AREAS[x.interest]].filter(Boolean).map(esc).join(" · ")}</p>${x.message?`<p>${esc(x.message)}</p>`:""}`},
   ["createdAt","name","phone","email","profession","interest","message","status"]);
 
-/* ---------- Generic list + add form ---------- */
+/* ---------- Generic list with add + edit ---------- */
 function crud(col,title,fields,opt){return async()=>{
-  const all=await R.list(col,opt.sort);
-  $("#main").innerHTML=`<h2>${title}</h2><form class="card" id="cf"><div class="grid2">${fields.map(f=>f.type==="image"
-      ?`<label style="grid-column:1/-1">${f.label}<input type="file" accept="image/*" name="${f.k}"><div class="prog"><i></i></div></label>`
+  const all=await R.list(col,opt.sort);let editing=null;
+  const fieldHTML=f=>f.type==="image"
+      ?`<label style="grid-column:1/-1">${f.label}<input type="file" accept="image/*" name="${f.k}"><small class="muted" data-cur="${f.k}"></small><div class="prog"><i></i></div></label>`
       :f.type==="select"?`<label>${f.label}<select name="${f.k}">${Object.entries(f.opts).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label>`
-      :f.type==="textarea"?`<label style="grid-column:1/-1">${f.label}<textarea name="${f.k}"></textarea></label>`
-      :`<label>${f.label}<input name="${f.k}" type="${f.type||"text"}" ${f.req?"required":""} placeholder="${f.ph||""}"></label>`).join("")}</div>
-    <div class="acts" style="margin-top:14px"><button class="btn" type="submit">Add</button></div></form>
-    <div class="card" id="list">${all.map(x=>`<div class="item" data-id="${esc(x.id)}">${opt.img(x)?`<img src="${esc(R.img(opt.img(x),200))}" alt="">`:""}<div class="tx"><b>${esc(opt.t(x))}</b><small>${esc(opt.s(x))}</small></div><div class="acts"><button class="btn sm red">Delete</button></div></div>`).join("")||'<p class="muted">Nothing added yet.</p>'}</div>`;
-  $("#cf").onsubmit=async e=>{e.preventDefault();const f=e.target,btn=$("button[type=submit]",f);btn.disabled=true;btn.textContent="Saving…";
-    try{const d={};for(const fd of fields){if(fd.type==="image"){const file=f[fd.k].files[0];d[fd.k]=file?await up(file,$(".prog i",f)):"";}else d[fd.k]=fd.type==="number"?+f[fd.k].value||0:fd.k==="tentative"?!!f[fd.k].value:f[fd.k].value.trim();}
-      await R.add(col,d);toast("Added");V[opt.view]();}catch(err){console.error(err);toast("Could not save: "+err.message);btn.disabled=false;btn.textContent="Add";}};
-  $$("#list .item").forEach(it=>$("button",it).onclick=async()=>{if(!confirm("Delete this item?"))return;await R.remove(col,it.dataset.id);it.remove();toast("Deleted");});};}
+      :f.type==="textarea"?`<label style="grid-column:1/-1">${f.label}<textarea name="${f.k}" placeholder="${f.ph||""}"></textarea></label>`
+      :`<label>${f.label}<input name="${f.k}" type="${f.type||"text"}" ${f.req?"required":""} placeholder="${f.ph||""}"></label>`;
+  $("#main").innerHTML=`<h2>${title}</h2>${opt.intro||""}<form class="card" id="cf"><b id="cfT">Add new</b><div class="grid2" style="margin-top:12px">${fields.map(fieldHTML).join("")}</div>
+    <div class="acts" style="margin-top:14px"><button class="btn ghost hide" type="button" id="cancel">Cancel</button><button class="btn" type="submit">Add</button></div></form>
+    <div class="card" id="list">${all.map(x=>`<div class="item" data-id="${esc(x.id)}">${opt.img(x)?`<img src="${esc(R.img(opt.img(x),200))}" alt="">`:""}<div class="tx"><b>${esc(opt.t(x))}</b><small>${esc(opt.s(x))}</small></div><div class="acts"><button class="btn sm ghost" data-edit>Edit</button><button class="btn sm red" data-del>Delete</button></div></div>`).join("")||'<p class="muted">Nothing added yet.</p>'}</div>`;
+  const f=$("#cf"),btn=$("button[type=submit]",f);
+  const reset=()=>{editing=null;f.reset();$("#cfT").textContent="Add new";btn.textContent="Add";$("#cancel").classList.add("hide");$$("[data-cur]",f).forEach(x=>x.textContent="");};
+  $("#cancel").onclick=reset;
+  f.onsubmit=async e=>{e.preventDefault();btn.disabled=true;const label=btn.textContent;btn.textContent="Saving…";
+    try{const d={};for(const fd of fields){
+        if(fd.type==="image"){const file=f[fd.k].files[0];if(file)d[fd.k]=await up(file,$(".prog i",f));else if(!editing)d[fd.k]="";}
+        else d[fd.k]=fd.type==="number"?+f[fd.k].value||0:fd.k==="tentative"?!!f[fd.k].value:f[fd.k].value.trim();}
+      if(editing){await R.update(col,editing,d);toast("Saved");}else{await R.add(col,d);toast("Added");}
+      V[opt.view]();}catch(err){console.error(err);toast("Not saved: "+err.message);btn.disabled=false;btn.textContent=label;}};
+  $$("#list .item").forEach(it=>{const x=all.find(a=>a.id===it.dataset.id);
+    $("[data-edit]",it).onclick=()=>{editing=x.id;for(const fd of fields){if(fd.type==="image"){$(`[data-cur="${fd.k}"]`,f).textContent=x[fd.k]?"A photo is already saved. Choose a new one only to replace it.":"";continue;}
+        const el=f[fd.k];el.value=fd.k==="tentative"?(x.tentative?"1":""):(x[fd.k]==null?"":x[fd.k]);}
+      $("#cfT").textContent="Editing: "+opt.t(x);btn.textContent="Save changes";$("#cancel").classList.remove("hide");f.scrollIntoView({behavior:"smooth",block:"start"});};
+    $("[data-del]",it).onclick=async()=>{if(!confirm("Delete this item?"))return;await R.remove(col,x.id);it.remove();toast("Deleted");};});
+  if(opt.after)opt.after(all);};}
 
 V.projects=crud("projects","Projects",[
   {k:"title",label:"Project title",req:1},{k:"area",label:"Area of focus",type:"select",opts:Object.fromEntries(Object.entries(AREAS).filter(([k])=>k!=="fellowship"))},
@@ -200,12 +213,19 @@ V.events=crud("events","Events & meetings",[
   {k:"title",label:"Event title",req:1},{k:"venue",label:"Venue"},{k:"date",label:"Date",type:"date",req:1},{k:"time",label:"Time",type:"time"},
   {k:"tentative",label:"Date confirmed?",type:"select",opts:{"":"Yes, confirmed","1":"Not yet (shows 'To be confirmed')"}},
   {k:"description",label:"Details",type:"textarea"}],
-  {view:"events",sort:{by:"date",dir:"asc"},img:()=>"",t:x=>x.title,s:x=>[x.date,x.time,x.venue].filter(Boolean).join(" · ")});
+  {view:"events",sort:{by:"date",dir:"asc"},img:()=>"",t:x=>x.title,s:x=>[x.date,x.time,x.venue].filter(Boolean).join(" · "),
+   intro:'<p class="muted" style="margin:-6px 0 14px">Weekly meetings appear on the site automatically from Settings. Add only special events here.</p>'});
 
-V.members=crud("members","Team / board",[
-  {k:"name",label:"Name",req:1},{k:"role",label:"Role",ph:"President, Secretary…"},{k:"order",label:"Display order",type:"number",ph:"1 = first"},
+V.members=crud("members","Board",[
+  {k:"role",label:"Role",req:1,ph:"e.g. Treasurer"},{k:"name",label:"Name (leave empty if not yet decided)",ph:"Shows 'To be announced' when empty"},
+  {k:"group",label:"Group",type:"select",opts:{officers:"Office bearers",chairs:"Committee chairs"}},{k:"order",label:"Display order",type:"number",ph:"1 = first"},
+  {k:"duty",label:"What this role does (one line)",type:"textarea",ph:"e.g. Manages club funds, member dues and accounts."},
   {k:"photo",label:"Photo (square works best)",type:"image"}],
-  {view:"members",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.name,s:x=>x.role||""});
+  {view:"members",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.role+": "+((x.name||"").trim()||"To be announced"),s:x=>(x.group==="chairs"?"Committee chair":"Office bearer")+" · order "+(x.order||0),
+   intro:'<p class="muted" style="margin:-6px 0 14px">When someone takes on an open role, tap <b>Edit</b> on that role and type their name. At the start of each Rotary year (1 July), edit the names for the new board.</p>',
+   after:all=>{const missing=R.seed.members.filter(m=>!all.some(a=>(a.role||"").toLowerCase()===m.role.toLowerCase()));
+     if(R.live&&missing.length){const c=document.createElement("div");c.className="card";c.innerHTML=`<b>${missing.length} standard board role${missing.length>1?"s are":" is"} missing</b><p class="muted" style="margin:4px 0 12px">${missing.map(m=>esc(m.role)).join(", ")}</p><button class="btn gold sm" id="addRoles">Add missing roles</button>`;
+       $("#main").insertBefore(c,$("#cf"));$("#addRoles").onclick=async e=>{e.target.disabled=true;try{await R.loadSeed({boardOnly:true});toast("Roles added");V.members();}catch(err){toast("Not added: "+err.message);e.target.disabled=false;}};}}});
 
 /* ---------- Gallery: multi-upload ---------- */
 V.gallery=async()=>{let all=await R.list("gallery");
