@@ -52,17 +52,24 @@
     ],
     gallery: [],
     members: [
-      { id: "m1", name: "Nikhil J. Dixit", role: "President", photo: "", order: 1, createdAt: now },
-      { id: "m2", name: "Aparna Amoncar", role: "Secretary, President-Elect", photo: "", order: 2, createdAt: now },
-      { id: "m3", name: "Abhishek Lawanis", role: "Membership Chair", photo: "", order: 3, createdAt: now },
-      { id: "m4", name: "Shweta Parab Naik", role: "Youth Services", photo: "", order: 4, createdAt: now },
-      { id: "m5", name: "Sandeep Morajkar", role: "Public Image", photo: "", order: 5, createdAt: now }
-    ],
+      // group: "officers" (office bearers) or "chairs" (committee chairs). Empty name = role still open.
+      { id: "m1",  group: "officers", role: "President", name: "Nikhil J. Dixit", duty: "Leads the club and chairs board meetings.", order: 1 },
+      { id: "m2",  group: "officers", role: "Secretary, President-Elect", name: "Aparna Amoncar", duty: "Keeps club records and minutes, and will lead the club in 2027–28.", order: 2 },
+      { id: "m3",  group: "officers", role: "Treasurer", name: "", duty: "Manages club funds, member dues and accounts.", order: 3 },
+      { id: "m4",  group: "officers", role: "Sergeant-at-Arms", name: "", duty: "Keeps meetings orderly and on time, and welcomes guests.", order: 4 },
+      { id: "m5",  group: "officers", role: "President Nominee", name: "", duty: "Will lead the club in 2028–29.", order: 5 },
+      { id: "m6",  group: "chairs", role: "Club Service", name: "", duty: "Birthdays, anniversaries, picnics, get-togethers and district events.", order: 6 },
+      { id: "m7",  group: "chairs", role: "Membership Chair", name: "Abhishek Lawanis", duty: "Admission policy, new member proposals and resignations.", order: 7 },
+      { id: "m8",  group: "chairs", role: "Rotary Foundation Chair", name: "", duty: "Raises and collects funds for The Rotary Foundation.", order: 8 },
+      { id: "m9",  group: "chairs", role: "Service Projects", name: "", duty: "Community, vocational and international service projects.", order: 9 },
+      { id: "m10", group: "chairs", role: "Youth Services", name: "Shweta Parab Naik", duty: "Rotaract and Interact clubs, youth festivals and competitions.", order: 10 },
+      { id: "m11", group: "chairs", role: "Public Image", name: "Sandeep Morajkar", duty: "Press releases, media and the club's social media.", order: 11 }
+    ].map(m => Object.assign({ photo: "", createdAt: now }, m)),
     suggestions: [],
     joinRequests: []
   };
 
-  const DKEY = "rcb_preview_v2";
+  const DKEY = "rcb_preview_v3";
   let demo = null;
   function D() {
     if (demo) return demo;
@@ -140,12 +147,23 @@
     },
 
     /* Live mode only: write starter settings/events/board once */
-    async loadSeed() {
+    async loadSeed(opts) {
       if (!LIVE) return;
-      await api.saveSettings(SEED.settings);
+      const o = opts || {};
+      if (!o.boardOnly) await api.saveSettings(Object.assign({}, SEED.settings, { seeded: true }));
+      else await api.saveSettings({ seeded: true });
       const [ev, mem] = await Promise.all([api.list("events"), api.list("members")]);
-      if (!ev.length) for (const e of SEED.events) { const c = Object.assign({}, e); delete c.id; await api.add("events", c); }
-      if (!mem.length) for (const m of SEED.members) { const c = Object.assign({}, m); delete c.id; await api.add("members", c); }
+      if (!o.boardOnly && !ev.length) for (const e of SEED.events) { const c = Object.assign({}, e); delete c.id; await api.add("events", c); }
+      // add any board roles that aren't there yet (matched by role name)
+      const have = new Set(mem.map(m => (m.role || "").toLowerCase()));
+      for (const m of SEED.members) if (!have.has(m.role.toLowerCase())) { const c = Object.assign({}, m); delete c.id; await api.add("members", c); }
+    },
+
+    /* Before "Load starter content" is run on the live site, show the
+       starter board/events so the site never looks empty. */
+    withSeed(S, E, M) {
+      const fresh = LIVE && !(S && S.seeded);
+      return { E: fresh && !E.length ? SEED.events : E, M: fresh && !M.length ? SEED.members : M };
     },
 
     /* Upload an image and return its URL. Cloudinary in live mode,
