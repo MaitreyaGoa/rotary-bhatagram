@@ -9,10 +9,13 @@ admin.html        admin panel (rcbhatagram.com/admin.html)
 js/config.js      Firebase + Cloudinary keys
 js/data.js        data layer + starter content (story, board, Rotary leaders, news, installation event)
 firestore.rules   security rules: paste into Firebase and Publish after every change to this file
-assets/           photos of the RI President and District Governor (replace with sharper ones any time)
+assets/           club logo (logo-*.png/.webp), RI President and District Governor photos.
+                  Add the official Rotary International logo as assets/rotary-international.png and it appears in the footer automatically.
 dawn.html, index-classic.html   old addresses, now redirect to the homepage
 CNAME             rcbhatagram.com
 ```
+
+**Three designs.** The **Design** button at the top switches between Modern (night-blue glass, the default), Classic (light, traditional Rotary) and Goa (sea, sun, palms and azulejo tiles). Each visitor's choice is remembered on their own device. It's all in `index.html`; no extra files.
 
 Until `js/config.js` has Firebase keys, the site runs in **preview mode**: it shows the real club details, but anything you save stays only in your own browser. The preview admin password is `demo`.
 
