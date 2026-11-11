@@ -11,7 +11,7 @@ service cloud.firestore {
 
     // Public content: anyone can read, only admins can change
     match /{col}/{id} {
-      allow read: if col in ['projects', 'events', 'gallery', 'members', 'settings'] || isAdmin();
+      allow read: if col in ['projects', 'events', 'gallery', 'members', 'settings', 'leaders', 'news'] || isAdmin();
       allow write: if isAdmin();
     }
 

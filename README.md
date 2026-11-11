@@ -4,16 +4,14 @@ Static website for GitHub Pages. Firebase stores suggestions, join requests and 
 Rotary International District 3170, Bicholim taluka, Goa.
 
 ```
-index.html        public website, Classic design (the default)
-dawn.html         the Dawn design (visitors switch with the Classic | Dawn button)
-admin.html        admin panel (yourdomain/admin.html)
-js/config.js      the ONLY file you edit to go live
-js/data.js        data layer + starter club content
-js/switch.js      the Classic | Dawn design switch (hide it: add layoutSwitch: false in config.js)
-firestore.rules   security rules to paste into Firebase
-assets/           put the official club logo here (logo.png)
-CNAME             your domain (rcbhatagram.com), already filled in
-.nojekyll         keep this (tells GitHub to serve files as-is)
+index.html        the public website (tabs: Home, Why Bhatagram, Board, Calendar, Projects, News)
+admin.html        admin panel (rcbhatagram.com/admin.html)
+js/config.js      Firebase + Cloudinary keys
+js/data.js        data layer + starter content (story, board, Rotary leaders, news, installation event)
+firestore.rules   security rules: paste into Firebase and Publish after every change to this file
+assets/           photos of the RI President and District Governor (replace with sharper ones any time)
+dawn.html, index-classic.html   old addresses, now redirect to the homepage
+CNAME             rcbhatagram.com
 ```
 
 Until `js/config.js` has Firebase keys, the site runs in **preview mode**: it shows the real club details, but anything you save stays only in your own browser. The preview admin password is `demo`.

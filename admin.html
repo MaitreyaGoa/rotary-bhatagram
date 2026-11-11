@@ -94,11 +94,11 @@ textarea{min-height:90px;resize:vertical}
   <nav class="tabs" id="tabs">
     <button data-v="dash" class="on">Dashboard</button>
     <button data-v="sug">Suggestions<span class="ct hide" id="ctS"></span></button>
-    <button data-v="join">Join requests<span class="ct hide" id="ctJ"></span></button>
     <button data-v="projects">Projects</button>
     <button data-v="events">Events</button>
-    <button data-v="gallery">Gallery</button>
+    <button data-v="news">News</button>
     <button data-v="members">Board</button>
+    <button data-v="leaders">Rotary leaders</button><span class="hide" id="ctJ"></span>
     <button data-v="settings">Settings</button>
   </nav>
   <main id="main"></main>
@@ -143,17 +143,17 @@ function csv(rows,cols,name){const q=v=>'"'+String(v==null?"":v).replace(/"/g,'"
 const V={};
 
 /* ---------- Dashboard ---------- */
-V.dash=async()=>{const {s,j,ns,nj}=await counts();const[p,e,g,mb]=await Promise.all([R.list("projects"),R.list("events"),R.list("gallery"),R.list("members",{by:"order",dir:"asc"})]);
+V.dash=async()=>{const {s:sg,ns}=await counts();const[e,mb,nw]=await Promise.all([R.list("events"),R.list("members",{by:"order",dir:"asc"}),R.list("news")]);
+  const today=new Date(Date.now()+330*6e4).toISOString().slice(0,10),board=mb.filter(m=>m.group!=="founders");
   $("#main").innerHTML=`<h2>Dashboard</h2><div class="grid4">
-   <div class="kpi"><b>${ns}</b><span>New suggestions</span></div><div class="kpi"><b>${nj}</b><span>New join requests</span></div>
-   <div class="kpi"><b>${mb.filter(m=>(m.name||"").trim()).length}/${mb.length}</b><span>Board roles filled</span></div><div class="kpi"><b>${g.length}</b><span>Photos</span></div></div>
-   <div class="card" style="margin-top:14px"><b>Latest suggestions</b>${s.slice(0,4).map(x=>`<div class="item"><div class="tx"><b>${esc(x.message)}</b><small>${esc(x.type)} · ${when(x.createdAt)}</small></div><span class="badge ${x.status}">${x.status}</span></div>`).join("")||'<p class="muted">None yet.</p>'}</div>
+   <div class="kpi"><b>${ns}</b><span>New suggestions</span></div><div class="kpi"><b>${e.filter(x=>x.date>=today).length}</b><span>Upcoming events</span></div>
+   <div class="kpi"><b>${board.filter(m=>(m.name||"").trim()).length}/${board.length}</b><span>Board roles filled</span></div><div class="kpi"><b>${nw.length}</b><span>News items</span></div></div>
+   <div class="card" style="margin-top:14px"><b>Latest suggestions</b>${sg.slice(0,4).map(x=>`<div class="item"><div class="tx"><b>${esc(x.message)}</b><small>${esc(x.type)} · ${when(x.createdAt)}</small></div><span class="badge ${x.status}">${x.status}</span></div>`).join("")||'<p class="muted">None yet.</p>'}</div>
    <div class="card"><b>Quick actions</b><div class="acts" style="justify-content:flex-start;margin-top:10px">
-    <button class="btn sm" onclick="document.querySelector('[data-v=gallery]').click()">Upload photos</button>
-    <button class="btn sm" onclick="document.querySelector('[data-v=projects]').click()">Add project</button>
     <button class="btn sm" onclick="document.querySelector('[data-v=events]').click()">Add event</button>
-    <button class="btn sm" onclick="document.querySelector('[data-v=members]').click()">Update board</button>
-    <button class="btn sm gold" onclick="document.querySelector('[data-v=settings]').click()">Update charter progress</button></div></div>`;};
+    <button class="btn sm" onclick="document.querySelector('[data-v=news]').click()">Add news</button>
+    <button class="btn sm" onclick="document.querySelector('[data-v=projects]').click()">Add project</button>
+    <button class="btn sm gold" onclick="document.querySelector('[data-v=members]').click()">Update board</button></div></div>`;};
 
 /* ---------- Inbox (suggestions / join) ---------- */
 function inbox(col,title,render,cols){return async()=>{let all=await R.list(col),f="all";
@@ -218,62 +218,55 @@ V.events=crud("events","Events & meetings",[
 
 V.members=crud("members","Board",[
   {k:"role",label:"Role",req:1,ph:"e.g. Treasurer"},{k:"name",label:"Name (leave empty if not yet decided)",ph:"Shows 'To be announced' when empty"},
-  {k:"group",label:"Group",type:"select",opts:{officers:"Office bearers",chairs:"Committee chairs"}},{k:"order",label:"Display order",type:"number",ph:"1 = first"},
+  {k:"group",label:"Group",type:"select",opts:{officers:"Office bearers",chairs:"Committee chairs",founders:"Founding members"}},{k:"order",label:"Display order",type:"number",ph:"1 = first"},
   {k:"duty",label:"What this role does (one line)",type:"textarea",ph:"e.g. Manages club funds, member dues and accounts."},
   {k:"photo",label:"Photo (square works best)",type:"image"}],
-  {view:"members",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.role+": "+((x.name||"").trim()||"To be announced"),s:x=>(x.group==="chairs"?"Committee chair":"Office bearer")+" · order "+(x.order||0),
-   intro:'<p class="muted" style="margin:-6px 0 14px">When someone takes on an open role, tap <b>Edit</b> on that role and type their name. At the start of each Rotary year (1 July), edit the names for the new board.</p>',
+  {view:"members",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.role+": "+((x.name||"").trim()||"To be announced"),s:x=>({chairs:"Committee chair",founders:"Founding member"}[x.group]||"Office bearer")+" · order "+(x.order||0),
+   intro:'<p class="muted" style="margin:-6px 0 14px">When someone takes on an open role, tap <b>Edit</b> on that role and type their name. At the start of each Rotary year (1 July), edit the names for the new board.<br><b>Founding members:</b> add each one with Role "Founding member", their name, and Group "Founding members". They show as a list under the board.</p>',
    after:all=>{const missing=R.seed.members.filter(m=>!all.some(a=>(a.role||"").toLowerCase()===m.role.toLowerCase()));
      if(R.live&&missing.length){const c=document.createElement("div");c.className="card";c.innerHTML=`<b>${missing.length} standard board role${missing.length>1?"s are":" is"} missing</b><p class="muted" style="margin:4px 0 12px">${missing.map(m=>esc(m.role)).join(", ")}</p><button class="btn gold sm" id="addRoles">Add missing roles</button>`;
        $("#main").insertBefore(c,$("#cf"));$("#addRoles").onclick=async e=>{e.target.disabled=true;try{await R.loadSeed({boardOnly:true});toast("Roles added");V.members();}catch(err){toast("Not added: "+err.message);e.target.disabled=false;}};}}});
 
-/* ---------- Gallery: multi-upload ---------- */
-V.gallery=async()=>{let all=await R.list("gallery");
-  $("#main").innerHTML=`<h2>Gallery</h2><div class="card"><label class="drop" id="drop"><input type="file" accept="image/*" multiple hidden id="gf">
-    <b>Tap to choose photos</b><br><span class="muted">or drag &amp; drop · several at once · resized automatically</span></label><div id="q"></div></div>
-    <div class="card"><b>${all.length} photos</b> <span class="muted">· edit a caption and tap outside to save</span><div class="ggrid" id="gg"></div></div>`;
-  const drawG=()=>{$("#gg").innerHTML=all.map(g=>`<div class="gi" data-id="${esc(g.id)}"><img src="${esc(R.img(g.url,300))}" alt="" loading="lazy"><button class="del" aria-label="Delete">✕</button><input value="${esc(g.caption||"")}" placeholder="Caption"></div>`).join("");
-    $$("#gg .gi").forEach(el=>{const id=el.dataset.id;
-      $(".del",el).onclick=async()=>{if(!confirm("Delete photo?"))return;await R.remove("gallery",id);all=all.filter(x=>x.id!==id);drawG();};
-      $("input",el).onchange=async e=>{await R.update("gallery",id,{caption:e.target.value.trim()});toast("Caption saved");};});};
-  drawG();
-  const handle=async files=>{for(const file of [...files]){if(!file.type.startsWith("image/"))continue;
-      const row=document.createElement("div");row.className="thumb";row.style.marginTop="10px";row.innerHTML=`<img src="${URL.createObjectURL(file)}"><div style="flex:1"><small>${esc(file.name)}</small><div class="prog"><i></i></div></div>`;$("#q").appendChild(row);
-      try{const url=await up(file,$(".prog i",row));await R.add("gallery",{url,caption:""});row.remove();all=await R.list("gallery");drawG();}catch(e){row.style.opacity=.5;}}
-    toast("Upload finished");};
-  $("#gf").onchange=e=>handle(e.target.files);
-  const d=$("#drop");["dragover","dragenter"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("over");}));
-  ["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("over");}));
-  d.addEventListener("drop",e=>handle(e.dataTransfer.files));};
+/* ---------- Rotary leaders (RI President, District Governor) ---------- */
+V.leaders=crud("leaders","Rotary leaders",[
+  {k:"name",label:"Name",req:1},{k:"role",label:"Title",req:1,ph:"e.g. District Governor, RI District 3170, 2026–27"},
+  {k:"order",label:"Display order",type:"number",ph:"1 = first"},{k:"photo",label:"Photo (square, face centred)",type:"image"}],
+  {view:"leaders",sort:{by:"order",dir:"asc"},img:x=>x.photo,t:x=>x.name,s:x=>x.role||"",
+   intro:'<p class="muted" style="margin:-6px 0 14px">The Rotary International President and our District Governor change every 1 July. Edit their names, titles and photos here.</p>'});
+
+/* ---------- News ---------- */
+V.news=crud("news","News",[
+  {k:"kind",label:"Type",type:"select",opts:{rotary:"Rotary International story",club:"Club news"}},{k:"date",label:"Date",type:"date",req:1},
+  {k:"title",label:"Headline",req:1},{k:"url",label:"Link (optional for club news)",type:"url",ph:"https://www.rotary.org/en/…"},
+  {k:"summary",label:"Summary (2–3 sentences, in your own words)",type:"textarea"},{k:"image",label:"Photo (optional, landscape)",type:"image"}],
+  {view:"news",sort:{by:"date",dir:"desc"},img:x=>x.image,t:x=>x.title,s:x=>[x.kind==="club"?"Club news":"Rotary International",x.date].filter(Boolean).join(" · "),
+   intro:'<p class="muted" style="margin:-6px 0 14px"><b>Rotary International story:</b> find it on rotary.org/en/news-and-stories, paste its link, and write a short summary in your own words. Don\'t copy the article text or photos. <b>Club news:</b> write it here and add your own photo. The newest items show first.</p>'});
 
 /* ---------- Settings ---------- */
-V.settings=async()=>{const S=await R.getSettings(),ch=S.charter||{};
-  const st=Array.isArray(S.stats)?S.stats:R.seed.settings.stats;
-  const STAGES=["Founding group formed","Orientation with senior Rotarians","Name and first board chosen","Charter paperwork and dues","Installation ceremony (club chartered)"];
+V.settings=async()=>{const S=await R.getSettings();
   const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const i=(k,l,v,t,ph)=>`<label>${l}<input name="${k}" type="${t||"text"}" value="${esc(v==null?"":v)}" placeholder="${ph||""}"></label>`;
   $("#main").innerHTML=`<h2>Settings</h2><form id="sf">
-   ${R.live?`<div class="card"><b>First time going live?</b><p class="muted" style="margin:4px 0 12px">Loads the club's starter details (meeting info, board, installation event) into the database. Safe to run once.</p><button class="btn gold" type="button" id="seed">Load starter content</button></div>`:""}
-   <div class="card"><b>Charter progress</b><p class="muted" style="margin:4px 0 12px">Shown on the home page timeline and the floating event card.</p><div class="grid2">
-     ${i("c_current","Founding members so far",ch.current,"number")}${i("c_target","Members needed for charter",ch.target||20,"number")}
-     <label style="grid-column:1/-1">Current stage<select name="c_stage">${STAGES.map((s,n)=>`<option value="${n}" ${+ch.stage===n?"selected":""}>${n+1}. ${s}</option>`).join("")}</select></label></div></div>
-   <div class="card"><b>Numbers on the home page</b><p class="muted" style="margin:4px 0 12px">Four figures under "Why Bhatagram?". Leave a label empty to hide it.</p>
-     ${[0,1,2,3].map(n=>`<div class="grid2" style="grid-template-columns:110px 1fr;margin-bottom:10px">${i("sv"+n,"Number",(st[n]||{}).v,"number")}${i("sl"+n,"Label",(st[n]||{}).l)}</div>`).join("")}</div>
-   <div class="card"><b>Home page and meetings</b><div class="grid2" style="margin-top:12px">
-     <label style="grid-column:1/-1">Intro paragraph<textarea name="intro">${esc(S.intro||"")}</textarea></label>
+   ${R.live?`<div class="card"><b>First time going live?</b><p class="muted" style="margin:4px 0 12px">Loads the starter details (meeting info, story, board, Rotary leaders, news, installation event) into the database. Use it once.</p><button class="btn gold" type="button" id="seed">Load starter content</button></div>`:""}
+   <div class="card"><b>Home page</b><div class="grid2" style="margin-top:12px">
+     <label style="grid-column:1/-1">Intro under "Rotary Club of Bhatagram"<textarea name="intro">${esc(S.intro||"")}</textarea></label></div></div>
+   <div class="card"><b>Why Bhatagram (story)</b><div class="grid2" style="margin-top:12px">
+     <label style="grid-column:1/-1">Short lead (one sentence)<input name="storyLead" value="${esc(S.storyLead||"")}"></label>
+     <label style="grid-column:1/-1">Story (leave an empty line between paragraphs)<textarea name="story" style="min-height:180px">${esc(S.story||"")}</textarea></label></div></div>
+   <div class="card"><b>Weekly meeting</b><div class="grid2" style="margin-top:12px">
      <label>Meeting day<select name="meetingWeekday">${DAYS.map((d,n)=>`<option value="${n}" ${+(S.meetingWeekday==null?3:S.meetingWeekday)===n?"selected":""}>${d}</option>`).join("")}</select></label>
-     ${i("meetingTime","Meeting time",S.meetingTime||"19:00","time")}
-     <label style="grid-column:1/-1">Meeting venue<input name="meetingVenue" value="${esc(S.meetingVenue||"")}"></label></div></div>
+     <div class="grid2">${i("meetingTime","Starts",S.meetingTime||"19:00","time")}${i("meetingEnd","Ends",S.meetingEnd||"","time")}</div>
+     <label>Venue (as shown publicly)<input name="meetingVenue" value="${esc(S.meetingVenue||"")}" placeholder="e.g. Bicholim, Goa"></label>
+     ${i("mapUrl","Google Maps link (optional)",S.mapUrl,"url","https://maps.app.goo.gl/…")}</div></div>
    <div class="card"><b>Contact and social</b><div class="grid2" style="margin-top:12px">
      ${i("email","Email",S.email,"email")}${i("phone","Phone",S.phone,"tel")}${i("whatsapp","WhatsApp number",S.whatsapp,"tel","91XXXXXXXXXX")}
      ${i("instagram","Instagram link",S.instagram,"url")}${i("facebook","Facebook link",S.facebook,"url")}</div></div>
    <button class="btn gold" type="submit" style="width:100%">Save settings</button>
    ${R.live?"":'<button class="btn ghost" type="button" id="rst" style="width:100%;margin-top:10px">Reset preview data</button>'}</form>`;
-  $("#sf").onsubmit=async e=>{e.preventDefault();const f=e.target,n=k=>+f[k].value||0,wd=+f.meetingWeekday.value;
-    const d={intro:f.intro.value.trim(),meetingWeekday:wd,meetingDay:"Every "+DAYS[wd],meetingTime:f.meetingTime.value,meetingVenue:f.meetingVenue.value.trim(),
-      email:f.email.value.trim(),phone:f.phone.value.trim(),whatsapp:f.whatsapp.value.trim(),instagram:f.instagram.value.trim(),facebook:f.facebook.value.trim(),
-      stats:[0,1,2,3].map(k=>({v:n("sv"+k),l:f["sl"+k].value.trim()})),
-      charter:{current:n("c_current"),target:n("c_target")||20,stage:n("c_stage")}};
+  $("#sf").onsubmit=async e=>{e.preventDefault();const f=e.target,wd=+f.meetingWeekday.value;
+    const d={intro:f.intro.value.trim(),storyLead:f.storyLead.value.trim(),story:f.story.value.trim(),meetingWeekday:wd,meetingDay:"Every "+DAYS[wd],meetingTime:f.meetingTime.value,meetingEnd:f.meetingEnd.value,
+      meetingVenue:f.meetingVenue.value.trim(),mapUrl:f.mapUrl.value.trim(),
+      email:f.email.value.trim(),phone:f.phone.value.trim(),whatsapp:f.whatsapp.value.trim(),instagram:f.instagram.value.trim(),facebook:f.facebook.value.trim()};
     try{await R.saveSettings(d);toast("Settings saved");}catch(err){toast("Settings not saved: "+err.message);}};
   const sd=$("#seed");if(sd)sd.onclick=async()=>{sd.disabled=true;sd.textContent="Loading…";try{await R.loadSeed();toast("Starter content loaded");V.settings();}catch(e){toast("Not loaded: "+e.message);sd.disabled=false;}};
   const r=$("#rst");if(r)r.onclick=()=>{if(confirm("Restore the starter content? Your preview changes will be lost.")){R.resetDemo();toast("Preview reset");V.settings();}};};
