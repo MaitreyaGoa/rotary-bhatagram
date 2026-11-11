@@ -31,19 +31,16 @@
   const now = Date.now();
   const SEED = {
     settings: {
-      intro: "A new Rotary club of young professionals from Bicholim taluka, coming together to take on projects for the welfare of our town and the villages around it.",
+      intro: "A new Rotary club in Bicholim taluka, Goa. Professionals from across the taluka, serving our town and the villages around it.",
+      storyLead: "Bhatagrama is an ancient name recorded for Sankhali, in our own Bicholim taluka.",
+      story: "When our founding members looked for a name, we wanted one that belongs to this land. Bhatagram carries our taluka's history, and gives our club an identity of its own alongside the Rotary Club of Bicholim, which has served the town since 1993.\n\nWe are lawyers, doctors, chartered accountants, teachers and business owners. Rotary membership is by invitation, and we came together to bring a new generation into service for Bicholim and the villages around it.",
       meetingDay: "Every Wednesday",
       meetingWeekday: 3,           // 0 = Sunday … 3 = Wednesday
       meetingTime: "19:00",
-      meetingVenue: "Kalyani, Bicholim",
-      email: "", phone: "", whatsapp: "", instagram: "", facebook: "",
-      charter: { current: 20, target: 20, stage: 3 },
-      stats: [
-        { v: 20, l: "Founding members" },
-        { v: 3, l: "Orientation sessions with senior Rotarians" },
-        { v: 2026, l: "Year founded" },
-        { v: 3170, l: "Rotary district" }
-      ]
+      meetingEnd: "21:00",
+      meetingVenue: "Bicholim, Goa",
+      mapUrl: "",
+      email: "", phone: "", whatsapp: "", instagram: "", facebook: ""
     },
     projects: [],
     events: [
@@ -51,8 +48,21 @@
         description: "The evening our club is formally installed and the first board takes charge. Date and venue to be confirmed.", tentative: true, createdAt: now }
     ],
     gallery: [],
+    leaders: [
+      { id: "l1", name: "Olayinka Hakeem Babalola", role: "President, Rotary International 2026–27", photo: "assets/ri-president.jpg", order: 1 },
+      { id: "l2", name: "Lenny Da Costa", role: "District Governor, RI District 3170, 2026–27", photo: "assets/district-governor.jpg", order: 2 }
+    ].map(m => Object.assign({ createdAt: now }, m)),
+    news: [
+      // kind: "rotary" (story on rotary.org) or "club" (our own news)
+      { id: "n1", kind: "rotary", title: "On the plus side", date: "2026-10-21", url: "https://www.rotary.org/en/articles/2026/10/on-the-plus-side",
+        summary: "In Pakistan, Rotary and its PolioPlus partners now offer more than vaccines: nutrition checks, clean water plants and vaccination points at bus and rail stations." },
+      { id: "n2", kind: "rotary", title: "Rotary projects around the globe", date: "2026-10-01", url: "https://www.rotary.org/en/articles/2026/10/rotary-projects-around-globe-october-2026",
+        summary: "A roundup of what clubs are doing this season in Bolivia, Canada, Trinidad and Tobago, Italy and Australia." },
+      { id: "n3", kind: "rotary", title: "High-tech classroom upgrades open pathways for girls in India", date: "2025-11-01", url: "https://www.rotary.org/en/articles/2025/11/high-tech-classroom-upgrades-open-pathways-for-girls-in-india",
+        summary: "Rotary clubs in California and Vijayawada are equipping girls' residential schools in Andhra Pradesh with computer and STEM labs, solar power and clean water." }
+    ].map(m => Object.assign({ image: "", createdAt: now }, m)),
     members: [
-      // group: "officers" (office bearers) or "chairs" (committee chairs). Empty name = role still open.
+      // group: "officers", "chairs" or "founders" (founding members). Empty name = role still open.
       { id: "m1",  group: "officers", role: "President", name: "Nikhil J. Dixit", duty: "Leads the club and chairs board meetings.", order: 1 },
       { id: "m2",  group: "officers", role: "Secretary, President-Elect", name: "Aparna Amoncar", duty: "Keeps club records and minutes, and will lead the club in 2027–28.", order: 2 },
       { id: "m3",  group: "officers", role: "Treasurer", name: "", duty: "Manages club funds, member dues and accounts.", order: 3 },
@@ -69,7 +79,7 @@
     joinRequests: []
   };
 
-  const DKEY = "rcb_preview_v3";
+  const DKEY = "rcb_preview_v4";
   let demo = null;
   function D() {
     if (demo) return demo;
@@ -154,6 +164,10 @@
       else await api.saveSettings({ seeded: true });
       const [ev, mem] = await Promise.all([api.list("events"), api.list("members")]);
       if (!o.boardOnly && !ev.length) for (const e of SEED.events) { const c = Object.assign({}, e); delete c.id; await api.add("events", c); }
+      if (!o.boardOnly) for (const col of ["leaders", "news"]) {
+        const have = await api.list(col);
+        if (!have.length) for (const e of SEED[col]) { const c = Object.assign({}, e); delete c.id; await api.add(col, c); }
+      }
       // add any board roles that aren't there yet (matched by role name)
       const have = new Set(mem.map(m => (m.role || "").toLowerCase()));
       for (const m of SEED.members) if (!have.has(m.role.toLowerCase())) { const c = Object.assign({}, m); delete c.id; await api.add("members", c); }
@@ -161,9 +175,9 @@
 
     /* Before "Load starter content" is run on the live site, show the
        starter board/events so the site never looks empty. */
-    withSeed(S, E, M) {
-      const fresh = LIVE && !(S && S.seeded);
-      return { E: fresh && !E.length ? SEED.events : E, M: fresh && !M.length ? SEED.members : M };
+    withSeed(S, E, M, L, N) {
+      const fresh = LIVE && !(S && S.seeded), f = (x, k) => fresh && !(x && x.length) ? SEED[k] : (x || []);
+      return { E: f(E, "events"), M: f(M, "members"), L: f(L, "leaders"), N: f(N, "news") };
     },
 
     /* Upload an image and return its URL. Cloudinary in live mode,
